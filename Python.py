@@ -1,141 +1,141 @@
 
 # opencv-python
 import cv2
-# mediapipeÈË¹¤ÖÇÄÜ¹¤¾ß°ü
+# mediapipeäººå·¥æ™ºèƒ½å·¥å…·åŒ…
 import mediapipe as mp
-# ½ø¶ÈÌõ¿â
+# è¿›åº¦æ¡åº“
 from tqdm import tqdm
-# Ê±¼ä¿â
+# æ—¶é—´åº“
 import time
 
 
-# # µ¼ÈëÄ£ĞÍ
+# # å¯¼å…¥æ¨¡å‹
 
-# µ¼Èësolution
+# å¯¼å…¥solution
 mp_hands = mp.solutions.hands
-# µ¼ÈëÄ£ĞÍ
-hands = mp_hands.Hands(static_image_mode=False,        # ÊÇ¾²Ì¬Í¼Æ¬»¹ÊÇÁ¬ĞøÊÓÆµÖ¡
-                       max_num_hands=3,                # ×î¶à¼ì²â¼¸Ö»ÊÖ
-                       min_detection_confidence=0.7,   # ÖÃĞÅ¶ÈãĞÖµ
-                       min_tracking_confidence=0.5)    # ×·×ÙãĞÖµ
-# µ¼Èë»æÍ¼º¯Êı
+# å¯¼å…¥æ¨¡å‹
+hands = mp_hands.Hands(static_image_mode=False,        # æ˜¯é™æ€å›¾ç‰‡è¿˜æ˜¯è¿ç»­è§†é¢‘å¸§
+                       max_num_hands=3,                # æœ€å¤šæ£€æµ‹å‡ åªæ‰‹
+                       min_detection_confidence=0.7,   # ç½®ä¿¡åº¦é˜ˆå€¼
+                       min_tracking_confidence=0.5)    # è¿½è¸ªé˜ˆå€¼
+# å¯¼å…¥ç»˜å›¾å‡½æ•°
 mpDraw = mp.solutions.drawing_utils 
 
 
-# # ´¦Àíµ¥Ö¡µÄº¯Êı
+# # å¤„ç†å•å¸§çš„å‡½æ•°
 
 def process_frame(img):
     
-    # ¼ÇÂ¼¸ÃÖ¡¿ªÊ¼´¦ÀíµÄÊ±¼ä
+    # è®°å½•è¯¥å¸§å¼€å§‹å¤„ç†çš„æ—¶é—´
     start_time = time.time()
     
-    # »ñÈ¡Í¼Ïñ¿í¸ß
+    # è·å–å›¾åƒå®½é«˜
     h, w = img.shape[0], img.shape[1]
 
-    # Ë®Æ½¾µÏñ·­×ªÍ¼Ïñ£¬Ê¹Í¼ÖĞ×óÓÒÊÖÓëÕæÊµ×óÓÒÊÖ¶ÔÓ¦
-    # ²ÎÊı 1£ºË®Æ½·­×ª£¬0£ºÊúÖ±·­×ª£¬-1£ºË®Æ½ºÍÊúÖ±¶¼·­×ª
+    # æ°´å¹³é•œåƒç¿»è½¬å›¾åƒï¼Œä½¿å›¾ä¸­å·¦å³æ‰‹ä¸çœŸå®å·¦å³æ‰‹å¯¹åº”
+    # å‚æ•° 1ï¼šæ°´å¹³ç¿»è½¬ï¼Œ0ï¼šç«–ç›´ç¿»è½¬ï¼Œ-1ï¼šæ°´å¹³å’Œç«–ç›´éƒ½ç¿»è½¬
     img = cv2.flip(img, 1)
-    # BGR×ªRGB
+    # BGRè½¬RGB
     img_RGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    # ½«RGBÍ¼ÏñÊäÈëÄ£ĞÍ£¬»ñÈ¡Ô¤²â½á¹û
+    # å°†RGBå›¾åƒè¾“å…¥æ¨¡å‹ï¼Œè·å–é¢„æµ‹ç»“æœ
     results = hands.process(img_RGB)
 
-    if results.multi_hand_landmarks: # Èç¹ûÓĞ¼ì²âµ½ÊÖ
+    if results.multi_hand_landmarks: # å¦‚æœæœ‰æ£€æµ‹åˆ°æ‰‹
 
         handness_str = ''
         index_finger_tip_str = ''
         for hand_idx in range(len(results.multi_hand_landmarks)):
 
-            # »ñÈ¡¸ÃÊÖµÄ21¸ö¹Ø¼üµã×ø±ê
+            # è·å–è¯¥æ‰‹çš„21ä¸ªå…³é”®ç‚¹åæ ‡
             hand_21 = results.multi_hand_landmarks[hand_idx]
 
-            # ¿ÉÊÓ»¯¹Ø¼üµã¼°¹Ç¼ÜÁ¬Ïß
+            # å¯è§†åŒ–å…³é”®ç‚¹åŠéª¨æ¶è¿çº¿
             mpDraw.draw_landmarks(img, hand_21, mp_hands.HAND_CONNECTIONS)
 
-            # ¼ÇÂ¼×óÓÒÊÖĞÅÏ¢
+            # è®°å½•å·¦å³æ‰‹ä¿¡æ¯
             temp_handness = results.multi_handedness[hand_idx].classification[0].label
             handness_str += '{}:{} '.format(hand_idx, temp_handness)
 
-            # »ñÈ¡ÊÖÍó¸ù²¿Éî¶È×ø±ê
+            # è·å–æ‰‹è…•æ ¹éƒ¨æ·±åº¦åæ ‡
             cz0 = hand_21.landmark[0].z
 
-            for i in range(21): # ±éÀú¸ÃÊÖµÄ21¸ö¹Ø¼üµã
+            for i in range(21): # éå†è¯¥æ‰‹çš„21ä¸ªå…³é”®ç‚¹
 
-                # »ñÈ¡3D×ø±ê
+                # è·å–3Dåæ ‡
                 cx = int(hand_21.landmark[i].x * w)
                 cy = int(hand_21.landmark[i].y * h)
                 cz = hand_21.landmark[i].z
                 depth_z = cz0 - cz
 
-                # ÓÃÔ²µÄ°ë¾¶·´Ó³Éî¶È´óĞ¡
+                # ç”¨åœ†çš„åŠå¾„åæ˜ æ·±åº¦å¤§å°
                 radius = max(int(6 * (1 + depth_z*5)), 0)
 
-                if i == 0: # ÊÖÍó
+                if i == 0: # æ‰‹è…•
                     img = cv2.circle(img,(cx,cy), radius, (0,0,255), -1)
-                if i == 8: # Ê³Ö¸Ö¸¼â
+                if i == 8: # é£ŸæŒ‡æŒ‡å°–
                     img = cv2.circle(img,(cx,cy), radius, (235,206,135), -1)
-                    # ½«Ïà¶ÔÓÚÊÖÍóµÄÉî¶È¾àÀëÏÔÊ¾ÔÚ»­ÃæÖĞ
+                    # å°†ç›¸å¯¹äºæ‰‹è…•çš„æ·±åº¦è·ç¦»æ˜¾ç¤ºåœ¨ç”»é¢ä¸­
                     index_finger_tip_str += '{}:{:.2f} '.format(hand_idx, depth_z)
-                if i in [1,5,9,13,17]: # Ö¸¸ù
+                if i in [1,5,9,13,17]: # æŒ‡æ ¹
                     img = cv2.circle(img,(cx,cy), radius, (16,144,247), -1)
-                if i in [2,6,10,14,18]: # µÚÒ»Ö¸½Ú
+                if i in [2,6,10,14,18]: # ç¬¬ä¸€æŒ‡èŠ‚
                     img = cv2.circle(img,(cx,cy), radius, (1,240,255), -1)
-                if i in [3,7,11,15,19]: # µÚ¶şÖ¸½Ú
+                if i in [3,7,11,15,19]: # ç¬¬äºŒæŒ‡èŠ‚
                     img = cv2.circle(img,(cx,cy), radius, (140,47,240), -1)
-                if i in [4,12,16,20]: # Ö¸¼â£¨³ıÊ³Ö¸Ö¸¼â£©
+                if i in [4,12,16,20]: # æŒ‡å°–ï¼ˆé™¤é£ŸæŒ‡æŒ‡å°–ï¼‰
                     img = cv2.circle(img,(cx,cy), radius, (223,155,60), -1)
 
         scaler = 1
         img = cv2.putText(img, handness_str, (25 * scaler, 100 * scaler), cv2.FONT_HERSHEY_SIMPLEX, 1 * scaler, (255, 0, 255), 2 * scaler)
         img = cv2.putText(img, index_finger_tip_str, (25 * scaler, 150 * scaler), cv2.FONT_HERSHEY_SIMPLEX, 1 * scaler, (255, 0, 255), 2 * scaler)
         
-        # ¼ÇÂ¼¸ÃÖ¡´¦ÀíÍê±ÏµÄÊ±¼ä
+        # è®°å½•è¯¥å¸§å¤„ç†å®Œæ¯•çš„æ—¶é—´
         end_time = time.time()
-        # ¼ÆËãÃ¿Ãë´¦ÀíÍ¼ÏñÖ¡ÊıFPS
+        # è®¡ç®—æ¯ç§’å¤„ç†å›¾åƒå¸§æ•°FPS
         FPS = 1/(end_time - start_time)
 
-        # ÔÚÍ¼ÏñÉÏĞ´FPSÊıÖµ£¬²ÎÊıÒÀ´ÎÎª£ºÍ¼Æ¬£¬Ìí¼ÓµÄÎÄ×Ö£¬×óÉÏ½Ç×ø±ê£¬×ÖÌå£¬×ÖÌå´óĞ¡£¬ÑÕÉ«£¬×ÖÌå´ÖÏ¸
+        # åœ¨å›¾åƒä¸Šå†™FPSæ•°å€¼ï¼Œå‚æ•°ä¾æ¬¡ä¸ºï¼šå›¾ç‰‡ï¼Œæ·»åŠ çš„æ–‡å­—ï¼Œå·¦ä¸Šè§’åæ ‡ï¼Œå­—ä½“ï¼Œå­—ä½“å¤§å°ï¼Œé¢œè‰²ï¼Œå­—ä½“ç²—ç»†
         scaler = 1
         img = cv2.putText(img, 'FPS  '+str(int(FPS)), (25 * scaler, 50 * scaler), cv2.FONT_HERSHEY_SIMPLEX, 1.25 * scaler, (255, 0, 255), 2 * scaler)
     return img
 
 
-# # µ÷ÓÃÉãÏñÍ·»ñÈ¡Ã¿Ö¡£¨Ä£°å£©
+# # è°ƒç”¨æ‘„åƒå¤´è·å–æ¯å¸§ï¼ˆæ¨¡æ¿ï¼‰
 
-# µ÷ÓÃÉãÏñÍ·ÖğÖ¡ÊµÊ±´¦ÀíÄ£°å
-# ²»ĞèĞŞ¸ÄÈÎºÎ´úÂë£¬Ö»ĞèĞŞ¸Äprocess_frameº¯Êı¼´¿É
-# Í¬¼Ã×ÓºÀĞÖ 2021-7-8
+# è°ƒç”¨æ‘„åƒå¤´é€å¸§å®æ—¶å¤„ç†æ¨¡æ¿
+# ä¸éœ€ä¿®æ”¹ä»»ä½•ä»£ç ï¼Œåªéœ€ä¿®æ”¹process_frameå‡½æ•°å³å¯
+# åŒæµå­è±ªå…„ 2021-7-8
 
-# µ¼Èëopencv-python
+# å¯¼å…¥opencv-python
 import cv2
 import time
 
-# »ñÈ¡ÉãÏñÍ·£¬´«Èë0±íÊ¾»ñÈ¡ÏµÍ³Ä¬ÈÏÉãÏñÍ·
+# è·å–æ‘„åƒå¤´ï¼Œä¼ å…¥0è¡¨ç¤ºè·å–ç³»ç»Ÿé»˜è®¤æ‘„åƒå¤´
 cap = cv2.VideoCapture(0)
 
-# ´ò¿ªcap
+# æ‰“å¼€cap
 cap.open(0)
 
-# ÎŞÏŞÑ­»·£¬Ö±µ½break±»´¥·¢
+# æ— é™å¾ªç¯ï¼Œç›´åˆ°breakè¢«è§¦å‘
 while cap.isOpened():
-    # »ñÈ¡»­Ãæ
+    # è·å–ç”»é¢
     success, frame = cap.read()
     if not success:
         break
     
-    ## !!!´¦ÀíÖ¡º¯Êı
+    ## !!!å¤„ç†å¸§å‡½æ•°
     frame = process_frame(frame)
     
-    # Õ¹Ê¾´¦ÀíºóµÄÈıÍ¨µÀÍ¼Ïñ
+    # å±•ç¤ºå¤„ç†åçš„ä¸‰é€šé“å›¾åƒ
     cv2.imshow('my_window', frame)
 
-    if cv2.waitKey(1) in [ord('q'),27]: # °´¼üÅÌÉÏµÄq»òescÍË³ö£¨ÔÚÓ¢ÎÄÊäÈë·¨ÏÂ£©
+    if cv2.waitKey(1) in [ord('q'),27]: # æŒ‰é”®ç›˜ä¸Šçš„qæˆ–escé€€å‡ºï¼ˆåœ¨è‹±æ–‡è¾“å…¥æ³•ä¸‹ï¼‰
         break
     
-# ¹Ø±ÕÉãÏñÍ·
+# å…³é—­æ‘„åƒå¤´
 cap.release()
 
-# ¹Ø±ÕÍ¼Ïñ´°¿Ú
+# å…³é—­å›¾åƒçª—å£
 cv2.destroyAllWindows()
 
 
